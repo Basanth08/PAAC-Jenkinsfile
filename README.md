@@ -51,13 +51,6 @@ This project demonstrates the concept of "Pipeline as a Code"—a practice where
 
 (Provide examples or instructions on how to use or run the pipeline code.)
 
-## Contributing
-
-Contributions are welcome! Please open issues or submit pull requests for improvements.
-
-## License
-
-(Add your license information here)
 
 ## Pipeline Concepts
 
@@ -183,4 +176,59 @@ pipeline {
             }
         }
     }
-} 
+}
+
+## 🖥️ Jenkins Server Setup (Ubuntu)
+
+Easily set up a Jenkins server on Ubuntu with the following steps and script:
+
+### 1. Install Jenkins & Java 17
+
+```bash
+#!/bin/bash
+sudo apt update
+sudo apt install -y openjdk-17-jdk ca-certificates apt-transport-https wget
+
+sudo mkdir -p /etc/apt/keyrings
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | \
+  sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y jenkins
+
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
+
+# Optional: Open firewall port
+# sudo ufw allow 8080
+
+sudo systemctl status jenkins
+```
+
+### 2. Troubleshooting & Tips
+
+- **Check Jenkins status:**
+  ```bash
+  sudo systemctl status jenkins
+  ```
+- **Check logs for errors:**
+  ```bash
+  sudo journalctl -u jenkins --no-pager | tail -50
+  ```
+- **Verify Java version:**
+  ```bash
+  java -version
+  # Should show Java 17
+  ```
+- **Set Java 17 as default (if needed):**
+  ```bash
+  sudo update-alternatives --config java
+  ```
+- **Open port 8080 in your cloud firewall/security group.**
+- **Get the initial admin password:**
+  ```bash
+  sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+  ``` 

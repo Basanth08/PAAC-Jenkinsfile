@@ -1,0 +1,21 @@
+#!/bin/bash
+sudo apt update
+sudo apt install -y openjdk-11-jdk ca-certificates apt-transport-https wget
+
+sudo mkdir -p /etc/apt/keyrings
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | \
+  sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y jenkins
+
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
+
+# Optional: Open firewall port
+# sudo ufw allow 8080
+
+sudo systemctl status jenkins
