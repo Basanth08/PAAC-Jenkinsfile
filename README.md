@@ -231,4 +231,52 @@ sudo systemctl status jenkins
 - **Get the initial admin password:**
   ```bash
   sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-  ``` 
+  ```
+
+## ☕ Java Version Management
+
+Managing multiple Java versions is a common DevOps task. Here's how to list and switch Java versions on both Ubuntu and macOS:
+
+### On Ubuntu/Linux
+
+**List installed Java versions:**
+```bash
+ls /usr/lib/jvm
+```
+
+**Set JAVA_HOME for a specific version (e.g., Java 8):**
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+**Check the active Java version:**
+```bash
+java -version
+```
+
+**Switch default Java version system-wide:**
+```bash
+sudo update-alternatives --config java
+```
+
+### On macOS
+
+**List installed Java versions:**
+```bash
+/usr/libexec/java_home -V
+```
+
+**Set JAVA_HOME for a specific version (e.g., Java 8 or 17):**
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)   # for Java 8
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)    # for Java 17
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+**Check the active Java version:**
+```bash
+java -version
+```
+
+This section demonstrates practical DevOps skills for cross-platform Java management—essential for CI/CD, Jenkins, and automation workflows. 
