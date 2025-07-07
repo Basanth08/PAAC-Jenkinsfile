@@ -42,7 +42,7 @@ This project demonstrates the concept of "Pipeline as a Code"—a practice where
    ```
 2. **Navigate to the project directory:**
    ```bash
-   cd "pipeline as a Code"
+   cd PAAC-Jenkinsfile
    ```
 3. **Install dependencies:**
    (Add instructions here for your stack, e.g., Python, Node.js, etc.)
