@@ -326,4 +326,233 @@ pipeline {
 }
 ```
 
-These plugins make your Jenkins pipelines more maintainable, efficient, and production-ready—demonstrating your ability to build real-world DevOps solutions. 
+These plugins make your Jenkins pipelines more maintainable, efficient, and production-ready—demonstrating your ability to build real-world DevOps solutions.
+
+## 🚨 Jenkinsfile Troubleshooting Guide
+
+### Common Issues and Solutions
+
+#### 1. Maven Not Found Error (`mvn: not found`)
+
+**Problem:**
+```
+[Pipeline] sh
++ mvn clean install
+/var/lib/jenkins/workspace/sample-paac@tmp/durable-57effa3b/script.sh.copy: 1: mvn: not found
+ERROR: script returned exit code 127
+```
+
+**Solutions:**
+
+**Option A: Configure Maven in Jenkins (Recommended)**
+1. Go to Jenkins Dashboard → Manage Jenkins → Tools
+2. Find "Maven installations" section
+3. Add a new Maven installation:
+   - Name: `Maven`
+   - Install automatically: Check this box
+   - Version: Choose a version (e.g., 3.9.5)
+
+**Option B: Use Tools Directive in Jenkinsfile**
+```groovy
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven'  // Must match the name configured in Jenkins
+    }
+    
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+    }
+}
+```
+
+**Option C: Local Maven Installation (No Jenkins Config Required)**
+```groovy
+pipeline {
+    agent any
+    
+    stages {
+        stage('Install Maven') {
+            steps {
+                sh '''
+                    # Check if Maven is already installed
+                    if ! command -v mvn &> /dev/null; then
+                        echo "Installing Maven locally..."
+                        # Download Maven
+                        wget https://archive.apache.org/dist/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz
+                        # Extract Maven
+                        tar -xzf apache-maven-3.9.5-bin.tar.gz
+                        # Add Maven to PATH for this session
+                        export PATH=$PWD/apache-maven-3.9.5/bin:$PATH
+                        echo "Maven installed successfully"
+                        mvn --version
+                    else
+                        echo "Maven is already installed"
+                        mvn --version
+                    fi
+                '''
+            }
+        }
+        stage('Build') {
+            steps {
+                sh '''
+                    # Set Maven path if installed locally
+                    if [ -d "apache-maven-3.9.5" ]; then
+                        export PATH=$PWD/apache-maven-3.9.5/bin:$PATH
+                    fi
+                    mvn clean install
+                '''
+            }
+        }
+    }
+}
+```
+
+#### 2. Sudo Password Required Error
+
+**Problem:**
+```
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required
+```
+
+**Solution:** Use the local Maven installation approach (Option C above) which doesn't require sudo privileges.
+
+#### 3. Git Credentials Issues
+
+**Problem:**
+```
+The recommended git tool is: NONE
+No credentials specified
+```
+
+**Solutions:**
+1. **For Public Repositories:** This is normal and safe to ignore
+2. **For Private Repositories:** Configure credentials in Jenkins:
+   - Go to Jenkins Dashboard → Manage Jenkins → Credentials
+   - Add credentials (Username/Password or SSH Key)
+   - Use credentials in Jenkinsfile:
+   ```groovy
+   stage('Fetch code') {
+       steps {
+           git branch: 'paac', 
+                url: 'https://github.com/devopshydclub/vprofile-project.git',
+                credentialsId: 'your-credential-id'
+       }
+   }
+   ```
+
+#### 4. Java Version Issues
+
+**Problem:**
+```
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile
+[ERROR] Fatal error compiling: invalid target release: 17
+```
+
+**Solution:** Ensure the correct Java version is available:
+```groovy
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven'
+        jdk 'JDK 17'  // Specify the correct JDK version
+    }
+    
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+    }
+}
+```
+
+### Complete Working Jenkinsfile Example
+
+```groovy
+pipeline {
+    agent any
+    
+    stages {
+        stage('Fetch code') {
+            steps {
+                git branch: 'paac', url: 'https://github.com/devopshydclub/vprofile-project.git'
+            }
+        }
+        stage('Install Maven') {
+            steps {
+                sh '''
+                    # Check if Maven is already installed
+                    if ! command -v mvn &> /dev/null; then
+                        echo "Installing Maven locally..."
+                        # Download Maven
+                        wget https://archive.apache.org/dist/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz
+                        # Extract Maven
+                        tar -xzf apache-maven-3.9.5-bin.tar.gz
+                        # Add Maven to PATH for this session
+                        export PATH=$PWD/apache-maven-3.9.5/bin:$PATH
+                        echo "Maven installed successfully"
+                        mvn --version
+                    else
+                        echo "Maven is already installed"
+                        mvn --version
+                    fi
+                '''
+            }
+        }
+        stage('Build') {
+            steps {
+                sh '''
+                    # Set Maven path if installed locally
+                    if [ -d "apache-maven-3.9.5" ]; then
+                        export PATH=$PWD/apache-maven-3.9.5/bin:$PATH
+                    fi
+                    mvn clean install
+                '''
+            }
+        }
+        stage('Test') {
+            steps {
+                sh '''
+                    # Set Maven path if installed locally
+                    if [ -d "apache-maven-3.9.5" ]; then
+                        export PATH=$PWD/apache-maven-3.9.5/bin:$PATH
+                    fi
+                    mvn test
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline completed'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
+```
+
+### Best Practices
+
+1. **Always check prerequisites** before running build commands
+2. **Use local installations** when Jenkins tools aren't configured
+3. **Add proper error handling** with post actions
+4. **Test your pipeline** with a simple project first
+5. **Keep Jenkinsfile version controlled** alongside your code
+6. **Use declarative syntax** for better readability and maintainability
+
+This troubleshooting guide covers the most common issues you'll encounter when setting up Jenkins pipelines for Java/Maven projects. 
