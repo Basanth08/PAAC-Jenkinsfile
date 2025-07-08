@@ -279,4 +279,51 @@ export PATH=$JAVA_HOME/bin:$PATH
 java -version
 ```
 
-This section demonstrates practical DevOps skills for cross-platform Java management—essential for CI/CD, Jenkins, and automation workflows. 
+This section demonstrates practical DevOps skills for cross-platform Java management—essential for CI/CD, Jenkins, and automation workflows.
+
+## 🔌 Recommended Jenkins Plugins
+
+Enhance your Jenkins pipelines with these essential plugins:
+
+### 1. Pipeline Maven Integration
+- **Purpose:** Seamlessly integrates Maven builds into Jenkins pipelines.
+- **Benefits:**
+  - Automatic detection and management of Maven build steps
+  - Advanced reporting for tests, code coverage, and static analysis
+  - Dependency caching for faster builds
+  - Visualizes Maven build stages in Jenkins UI
+
+### 2. Pipeline Utility Steps
+- **Purpose:** Adds a collection of utility steps for use in Jenkins pipelines.
+- **Benefits:**
+  - Read/write files, manipulate archives, parse JSON/YAML, and more
+  - Enables advanced scripting and automation in Jenkinsfiles
+  - Makes pipelines more flexible and powerful
+
+### 🧩 Example Usage in Jenkinsfile
+```groovy
+pipeline {
+    agent any
+    stages {
+        stage('Build with Maven') {
+            steps {
+                // Uses the Maven integration plugin
+                withMaven(maven: 'Maven 3.8.1') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+        stage('Read a File') {
+            steps {
+                // Uses the utility steps plugin
+                script {
+                    def content = readFile 'pom.xml'
+                    echo "POM file content: ${content.substring(0, 100)}"
+                }
+            }
+        }
+    }
+}
+```
+
+These plugins make your Jenkins pipelines more maintainable, efficient, and production-ready—demonstrating your ability to build real-world DevOps solutions. 
